@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e
+set -u
+
+# check if an argument was supplied
+BRANCH=$1
+if [ "x$BRANCH" = "x" ]; then
+	echo "Please provide a branch"
+	exit 1
+fi
+
+# set up some variables
+export SCRIPTPATH=`dirname $0`
+. $SCRIPTPATH/nightly-builder-config
+
+cd $BUILDPATH
+
+# clean old xpis
+find $STOREPATH/ -ctime +100 -name "*.xpi" -exec rm -f "{}" \;
+
+# build the xpi
+XPIPATH=$STOREPATH/$BRANCH
+XPI=$XPINAME-`date +%Y%m%d`.xpi 
+ABSXPI=$XPIPATH/$XPI
+mkdir -p $XPIPATH
+
+ABSBRANCH=""
+if [ "x$BRANCH" != "xtrunk" ]; then
+	ABSBRANCH=branches/$BRANCH
+fi
+python make.py --nightly --updateURL=$BASEURL/update-$BRANCH.rdf --nocomment --quiet $ABSBRANCH --output=$ABSXPI
+python updaterdf.py $ABSXPI $STOREPATH/update-$BRANCH.rdf $BASEURL/$BRANCH/$XPI
+
+# create the link for latest
+rm -f $STOREPATH/$XPINAME-$BRANCH.xpi
+ln -s $ABSXPI $STOREPATH/$XPINAME-$BRANCH.xpi
