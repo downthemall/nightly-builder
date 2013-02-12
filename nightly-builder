@@ -26,9 +26,13 @@ mkdir -p $XPIPATH
 
 ABSBRANCH=""
 if [ "x$BRANCH" != "xtrunk" ]; then
-	ABSBRANCH=branches/$BRANCH
+  ABSBRANCH=branches/$BRANCH
+  python make.py --nightly --updateURL=$BASEURL/update-$BRANCH.rdf --nocomment --quiet $ABSBRANCH --output=$ABSXPI
+else
+  svn export https://code.downthemall.net/repos/trunk export
+  python2.7 export/make.py --force --nightly --updateURL=$BASEURL/update-$BRANCH.rdf $ABSXPI
+  rm -rf export
 fi
-python make.py --nightly --updateURL=$BASEURL/update-$BRANCH.rdf --nocomment --quiet $ABSBRANCH --output=$ABSXPI
 python updaterdf.py $ABSXPI $STOREPATH/update-$BRANCH.rdf $BASEURL/$BRANCH/$XPI
 
 # create the link for latest
