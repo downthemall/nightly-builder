@@ -29,6 +29,7 @@ if [ "x$BRANCH" != "xtrunk" ]; then
   ABSBRANCH=branches/$BRANCH
   python make.py --nightly --updateURL=$BASEURL/update-$BRANCH.rdf --nocomment --quiet $ABSBRANCH --output=$ABSXPI
 else
+  rm -rf export
   svn export https://code.downthemall.net/repos/trunk export
   python2.7 export/make.py --force --nightly --updateURL=$BASEURL/update-$BRANCH.rdf $ABSXPI
   rm -rf export
